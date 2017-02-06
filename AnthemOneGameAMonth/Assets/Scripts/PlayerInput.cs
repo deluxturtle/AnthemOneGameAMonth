@@ -11,31 +11,30 @@ public class PlayerInput : MonoBehaviour {
 
     void Start()
     {
-        plane.SetNormalAndPosition(Vector3.up, Vector3.forward);
+        plane.SetNormalAndPosition(Vector3.forward, Vector3.up);
     }
 
     // Update is called once per frame
     void Update()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit[] hits;
-        hits = Physics.RaycastAll(ray, 500f);
-
-
+        Collider2D[] hitColliders;
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, 10));
+        hitColliders = Physics2D.OverlapPointAll(mousePos);
+        
 
         hitTile = false;
-        for (int i = 0; i < hits.Length; i++)
+        for (int i = 0; i < hitColliders.Length; i++)
         {
-            if(hits[i].collider.gameObject.GetComponent<GameGridTile>())
+            if (hitColliders[i].gameObject.GetComponent<Tile>())
             {
-                selectedTile = hits[i].collider.gameObject;
-                selectedTile.GetComponent<Renderer>().enabled = true;
-                
+                selectedTile = hitColliders[i].gameObject;
+                selectedTile.GetComponent<Renderer>().material.color = Color.yellow;
+
 
                 if (selectedTile != previousTile)
                 {
                     if (previousTile != null)
-                        previousTile.GetComponent<Renderer>().enabled = false;
+                        previousTile.GetComponent<Renderer>().material.color = Color.black;
                     previousTile = selectedTile;
                 }
 
@@ -46,28 +45,53 @@ public class PlayerInput : MonoBehaviour {
         if (!hitTile)
         {
             float distance;
-            if(plane.Raycast(ray, out distance))
+            
+            foreach(GameObject tile in GameObject.FindGameObjectsWithTag("Tile"))
             {
-                Vector3 point = ray.GetPoint(distance);
-                //Get tiles closest to point
-                foreach(GameObject tile in FindObjectOfType<GameGridTile>().gameObject)
+                //get closest one
+                if(previousTile != null)
                 {
-
-                    //Get closest one
-
-                    if(Vector3.Distance(tile.transform.position, point) < Vector3.Distance(previousTile.transform.position, point))
+                    if (Vector3.Distance(tile.transform.position, mousePos) < Vector2.Distance(previousTile.transform.position, mousePos))
                     {
-                        if(tile != previousTile)
-                        selectedTile = tile;
+                        if (tile != previousTile)
+                        {
+                            selectedTile = tile;
+                            selectedTile.GetComponent<Renderer>().material.color = Color.yellow;
+                        }
                         if (selectedTile != previousTile)
                         {
-                            if (previousTile != null)
-                                previousTile.GetComponent<Renderer>().enabled = false;
+                            previousTile.GetComponent<Renderer>().material.color = Color.black;
                             previousTile = selectedTile;
                         }
                     }
                 }
             }
+            //if (plane.Raycast(ray, out distance))
+            //{
+            //    Vector3 point = ray.GetPoint(distance);
+            //    //Get tiles closest to point
+            //    foreach (GameObject tile in GameObject.FindGameObjectsWithTag("Tile"))
+            //    {
+
+            //        //Get closest one
+            //        if (previousTile != null)
+            //        {
+            //            if (Vector3.Distance(tile.transform.position, point) < Vector3.Distance(previousTile.transform.position, point))
+            //            {
+            //                if (tile != previousTile)
+            //                {
+            //                    selectedTile = tile;
+            //                    selectedTile.GetComponent<Renderer>().material.color = Color.yellow;
+            //                }
+            //                if (selectedTile != previousTile)
+            //                {
+            //                    previousTile.GetComponent<Renderer>().material.color = Color.black;
+            //                    previousTile = selectedTile;
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
         }
     }
 }
