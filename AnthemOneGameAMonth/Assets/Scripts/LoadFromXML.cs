@@ -13,6 +13,8 @@ public class LoadFromXML : MonoBehaviour {
     public int layerHeight;
 
     private Sprite[] spriteTiles;
+    //Villager male
+    private const int VILLAGER_M = 90;
     
     void Awake()
     {
@@ -45,8 +47,25 @@ public class LoadFromXML : MonoBehaviour {
         float tileWidth = (float.Parse(tilesetInfo.Attributes["tilewidth"].Value) / (float)16);
         float tileHeight = (float.Parse(tilesetInfo.Attributes["tileheight"].Value) / (float)16);
 
+        //Generate Collision grid for mouse input.
+        float width = float.Parse(xmlDoc.SelectSingleNode("map").Attributes["width"].Value);
+        float height = float.Parse(xmlDoc.SelectSingleNode("map").Attributes["height"].Value);
+        for (int i = 0; i < height; i++)
+        {
+            for(int j = 0; j < width; j++)
+            {
+                GameObject tempSprite = new GameObject("gid(" + i + "," + j + ")");
+                Tile tempTile = tempSprite.AddComponent<Tile>();
+                tempTile.x = i;
+                tempTile.y = j;
+                tempSprite.AddComponent<BoxCollider2D>();
+                //set position
+                tempSprite.transform.position = new Vector3((tileWidth * i), (tileHeight * j));
+            }
+        }
+
         //for each layer that exists
-        foreach(XmlNode layerInfo in layerNames)
+        foreach (XmlNode layerInfo in layerNames)
         {
             layerWidth = int.Parse(layerInfo.Attributes["width"].Value);
             layerHeight = int.Parse(layerInfo.Attributes["height"].Value);
@@ -93,15 +112,27 @@ public class LoadFromXML : MonoBehaviour {
                     }
                     tempSprite.transform.parent = GameObject.Find(layerInfo.Attributes["name"].Value + "Layer").transform;
                     tempSprite.tag = "Tile";
+                    
 
-                    if(layerInfo.Attributes["name"].Value == "Background")
+                    if (layerInfo.Attributes["name"].Value == "Background")
                     {
-                        tempSprite.AddComponent<BoxCollider2D>();
+                        
+                    }
+
+                    if(layerInfo.Attributes["name"].Value == "Entities")
+                    {
+                        tempSprite.tag = "Entity";
+                        switch (spriteValue-1)
+                        {
+                            case VILLAGER_M:
+                                Debug.Log("Found villager");
+                                tempSprite.name = "Villager";
+                                break;
+                        }
                     }
 
 
                 }
-
                 horizontalIndex++;
                 if(horizontalIndex % layerWidth == 0)
                 {

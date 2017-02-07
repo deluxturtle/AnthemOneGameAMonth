@@ -1,13 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Author: Andrew Seba
+/// Description: Controls mouse selection and stuff of that sort.
+/// </summary>
 public class PlayerInput : MonoBehaviour {
 
-    //Ground Zero
-    Plane plane = new Plane();
-    GameObject previousTile = null;
-    GameObject selectedTile;
-    bool hitTile = false;
+    [Tooltip("The cursor object you'd like to use.")]
+    public GameObject cursor;
+
+    private Plane plane = new Plane();
+    private GameObject selectedEnt = null;
+    private GameObject previousTile = null;
+    private GameObject selectedTile;
+    private bool hitTile = false;
 
     void Start()
     {
@@ -28,14 +35,12 @@ public class PlayerInput : MonoBehaviour {
             if (hitColliders[i].gameObject.GetComponent<Tile>())
             {
                 selectedTile = hitColliders[i].gameObject;
-                selectedTile.GetComponent<Renderer>().material.color = Color.yellow;
+                //selectedTile.GetComponent<Renderer>().material.color = Color.yellow;
 
 
                 if (selectedTile != previousTile)
                 {
-                    if (previousTile != null)
-                        previousTile.GetComponent<Renderer>().material.color = Color.black;
-                    previousTile = selectedTile;
+                    UpdateSelectedTile();
                 }
 
                 hitTile = true;
@@ -43,9 +48,7 @@ public class PlayerInput : MonoBehaviour {
         }
         //get closest tile
         if (!hitTile)
-        {
-            float distance;
-            
+        {            
             foreach(GameObject tile in GameObject.FindGameObjectsWithTag("Tile"))
             {
                 //get closest one
@@ -56,42 +59,48 @@ public class PlayerInput : MonoBehaviour {
                         if (tile != previousTile)
                         {
                             selectedTile = tile;
-                            selectedTile.GetComponent<Renderer>().material.color = Color.yellow;
+                            //selectedTile.GetComponent<Renderer>().material.color = Color.yellow;
                         }
                         if (selectedTile != previousTile)
                         {
-                            previousTile.GetComponent<Renderer>().material.color = Color.black;
-                            previousTile = selectedTile;
+                            UpdateSelectedTile();
                         }
                     }
                 }
             }
-            //if (plane.Raycast(ray, out distance))
-            //{
-            //    Vector3 point = ray.GetPoint(distance);
-            //    //Get tiles closest to point
-            //    foreach (GameObject tile in GameObject.FindGameObjectsWithTag("Tile"))
-            //    {
-
-            //        //Get closest one
-            //        if (previousTile != null)
-            //        {
-            //            if (Vector3.Distance(tile.transform.position, point) < Vector3.Distance(previousTile.transform.position, point))
-            //            {
-            //                if (tile != previousTile)
-            //                {
-            //                    selectedTile = tile;
-            //                    selectedTile.GetComponent<Renderer>().material.color = Color.yellow;
-            //                }
-            //                if (selectedTile != previousTile)
-            //                {
-            //                    previousTile.GetComponent<Renderer>().material.color = Color.black;
-            //                    previousTile = selectedTile;
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
         }
+
+        if (Input.GetButtonDown("Fire1"))
+        {
+            foreach(GameObject entitie in GameObject.FindGameObjectsWithTag("Entity"))
+            {
+                Tile tileScript = entitie.GetComponent<Tile>();
+                Tile selectedTileScript = selectedTile.GetComponent<Tile>();
+                if(tileScript != null)
+                {
+                    if(tileScript.x == selectedTileScript.x && tileScript.y == selectedTileScript.y)
+                    {
+
+                    }
+                }
+                
+            }
+        }
+    }
+
+    /// <summary>
+    /// When the selected tile changes this function will run.
+    /// </summary>
+    void UpdateSelectedTile()
+    {
+        //Change stuff on the previous.
+        if (previousTile != null)
+        {
+            //previousTile.GetComponent<Renderer>().material.color = Color.black;
+        }
+        previousTile = selectedTile;
+        cursor.transform.position = previousTile.transform.position;
+
+        //Debug.Log(previousTile.name);
     }
 }
