@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Xml;
 using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// Author: Andrew Seba
@@ -49,8 +50,11 @@ public class LoadFromXML : MonoBehaviour {
         float tileHeight = (float.Parse(tilesetInfo.Attributes["tileheight"].Value) / (float)16);
 
         //Generate Collision grid for mouse input.
-        float width = float.Parse(xmlDoc.SelectSingleNode("map").Attributes["width"].Value);
-        float height = float.Parse(xmlDoc.SelectSingleNode("map").Attributes["height"].Value);
+        int width = int.Parse(xmlDoc.SelectSingleNode("map").Attributes["width"].Value);
+        int height = int.Parse(xmlDoc.SelectSingleNode("map").Attributes["height"].Value);
+
+        Tile[,] allTiles = new Tile[width, height];
+        
         for (int i = 0; i < height; i++)
         {
             for(int j = 0; j < width; j++)
@@ -59,11 +63,38 @@ public class LoadFromXML : MonoBehaviour {
                 Tile tempTile = tempSprite.AddComponent<Tile>();
                 tempTile.x = i;
                 tempTile.y = j;
+                allTiles[j, i] = tempTile;
                 tempSprite.AddComponent<BoxCollider2D>();
                 //set position
                 tempSprite.transform.position = new Vector3((tileWidth * i), (tileHeight * j));
             }
         }
+
+        Debug.Log("Building Connections...");
+        //Build Basic Connections
+        foreach(Tile tile in allTiles)
+        {
+            //Left
+            if (tile.x - 1 > 0)
+            {
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x - 1, tile.y].gameObject, 1));
+            }
+            if(tile.x + 1 < width)
+            {
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x + 1, tile.y].gameObject, 1));
+            }
+            if(tile.y - 1 > 0)
+            {
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x, tile.y - 1].gameObject, 1));
+            }
+            if(tile.y + 1 < height)
+            {
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x, tile.y + 1].gameObject, 1));
+            }
+        }
+        Debug.Log("Connections built.");
+
+
 
         //for each layer that exists
         foreach (XmlNode layerInfo in layerNames)
@@ -89,11 +120,7 @@ public class LoadFromXML : MonoBehaviour {
 
                     //Create a sprite
                     GameObject tempSprite = new GameObject(layerInfo.Attributes["name"].Value + " <" + horizontalIndex + ", " + verticalIndex + ">");
-
-                    //add the tile script to it
-                    Tile tempTile = tempSprite.AddComponent<Tile>();
-                    tempTile.x = horizontalIndex;
-                    tempTile.y = verticalIndex;
+                    
 
                     //Make a sprite renderer.
                     SpriteRenderer spriteRend = tempSprite.AddComponent<SpriteRenderer>();
