@@ -15,6 +15,7 @@ public class LoadFromXML : MonoBehaviour {
     private Sprite[] spriteTiles;
     //Villager male
     private const int VILLAGER_M = 90;
+    private const int VILLAGER_BLU_M = 245;
     
     void Awake()
     {
@@ -124,10 +125,12 @@ public class LoadFromXML : MonoBehaviour {
                         tempSprite.tag = "Entity";
                         switch (spriteValue-1)
                         {
+                            case VILLAGER_BLU_M:
                             case VILLAGER_M:
                                 Debug.Log("Found villager");
                                 tempSprite.name = "Villager";
-                                tempSprite.AddComponent<Human>();
+                                Human tempHuman = tempSprite.AddComponent<Human>();
+                                tempHuman.ClassType = Class.Villager;
                                 break;
                         }
                     }

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 /// <summary>
@@ -27,6 +28,7 @@ public class PlayerInput : MonoBehaviour {
         {
             allTiles.Add(tile);
         }
+        StartCoroutine("SelectUnit");
     }
 
     // Update is called once per frame
@@ -78,29 +80,55 @@ public class PlayerInput : MonoBehaviour {
             }
         }
 
-        if (Input.GetButtonDown("Fire1"))
+        cursor.transform.position = mousePos;
+    }
+
+    IEnumerator SelectUnit()
+    {
+        Debug.Log("Get selection");
+        bool selectedUnit = false;
+        while (!selectedUnit)
         {
-            foreach(GameObject entitie in GameObject.FindGameObjectsWithTag("Entity"))
+            if (Input.GetButtonDown("Fire1"))
             {
-                Tile tileScript = entitie.GetComponent<Tile>();
-                Tile selectedTileScript = selectedTile.GetComponent<Tile>();
-                if(tileScript != null)
+                foreach (GameObject entity in GameObject.FindGameObjectsWithTag("Entity"))
                 {
-                    if(tileScript.x == selectedTileScript.x && tileScript.y == selectedTileScript.y)
+                    Tile tileScript = entity.GetComponent<Tile>();
+                    Tile selectedTileScript = selectedTile.GetComponent<Tile>();
+                    if (tileScript != null && tileScript.gameObject.GetComponent<Human>() != null)
                     {
-                        if(tileScript.gameObject.tag == "Entity")
+                        if (tileScript.x == selectedTileScript.x && tileScript.y == selectedTileScript.y)
                         {
                             selectedEnt = tileScript.gameObject;
-                            Debug.Log("Selected " + selectedEnt.name);
+                            Debug.Log("Selected: " + selectedEnt.name);
+                            yield return new WaitForEndOfFrame();
+                            StartCoroutine("SelectDestination");
+                            selectedUnit = true;
                             break;
                         }
                     }
                 }
                 
             }
+            yield return null;
         }
+    }
 
-        cursor.transform.position = mousePos;
+    IEnumerator SelectDestination()
+    {
+        Debug.Log("Select tile to move to.");
+        while (true)
+        {
+            if (selectedTile != null && Input.GetButtonDown("Fire1"))
+            {
+                selectedEnt.GetComponent<Human>().MoveTo(selectedTile);
+                
+                break;
+            }
+            yield return null;
+        }
+        StartCoroutine("SelectUnit");
+        StopCoroutine("SelectDestination");
     }
 
     /// <summary>

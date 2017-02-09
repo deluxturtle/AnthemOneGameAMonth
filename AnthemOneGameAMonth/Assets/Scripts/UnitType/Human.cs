@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+
 
 /// <summary>
 /// Classes of human.
@@ -17,6 +19,8 @@ public enum Class
 /// Description: Human entity with types of classes.
 /// </summary>
 public class Human : Entity {
+
+    public float moveAnimationSpeed = 2f;
 
     private Class classType;
     private int speed;
@@ -38,6 +42,25 @@ public class Human : Entity {
         }
     }
 
+    public void MoveTo(GameObject target)
+    {
+        StartCoroutine(AnimateMovement(target.transform.position));
+    }
 
+    IEnumerator AnimateMovement(Vector3 target)
+    {
+        Vector3 startPos = transform.position;
+
+        float elapsedTime = 0;
+        float timeNeeded = (Vector3.Distance(startPos, target) / moveAnimationSpeed);
+
+        while(elapsedTime <= timeNeeded)
+        {
+            transform.position = Vector3.Lerp(startPos, target, (elapsedTime / timeNeeded));
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+        transform.position = target;
+    }
 
 }
