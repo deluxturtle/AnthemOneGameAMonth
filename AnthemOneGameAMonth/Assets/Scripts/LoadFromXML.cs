@@ -29,7 +29,7 @@ public class LoadFromXML : MonoBehaviour {
 
         try
         {
-            spriteTiles = Resources.LoadAll<Sprite>("Tile-set - Toen's Medieval Strategy (16x16) - v.1.0");
+            spriteTiles = Resources.LoadAll<Sprite>("Tile-set(Toen's)");
         }
         catch
         {
@@ -127,6 +127,7 @@ public class LoadFromXML : MonoBehaviour {
                             case VILLAGER_M:
                                 Debug.Log("Found villager");
                                 tempSprite.name = "Villager";
+                                tempSprite.AddComponent<Human>();
                                 break;
                         }
                     }

@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// Author: Andrew Seba
@@ -9,16 +9,24 @@ public class PlayerInput : MonoBehaviour {
 
     [Tooltip("The cursor object you'd like to use.")]
     public GameObject cursor;
+    [Tooltip("Square Cursor for seeing your selection on the grid.")]
+    public GameObject tileCursor;
 
     private Plane plane = new Plane();
     private GameObject selectedEnt = null;
     private GameObject previousTile = null;
     private GameObject selectedTile;
     private bool hitTile = false;
+    private List<Tile> allTiles = new List<Tile>();
 
     void Start()
     {
+        Cursor.visible = false;
         plane.SetNormalAndPosition(Vector3.forward, Vector3.up);
+        foreach(Tile tile in GameObject.FindObjectsOfType<Tile>())
+        {
+            allTiles.Add(tile);
+        }
     }
 
     // Update is called once per frame
@@ -80,12 +88,19 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if(tileScript.x == selectedTileScript.x && tileScript.y == selectedTileScript.y)
                     {
-
+                        if(tileScript.gameObject.tag == "Entity")
+                        {
+                            selectedEnt = tileScript.gameObject;
+                            Debug.Log("Selected " + selectedEnt.name);
+                            break;
+                        }
                     }
                 }
                 
             }
         }
+
+        cursor.transform.position = mousePos;
     }
 
     /// <summary>
@@ -99,7 +114,7 @@ public class PlayerInput : MonoBehaviour {
             //previousTile.GetComponent<Renderer>().material.color = Color.black;
         }
         previousTile = selectedTile;
-        cursor.transform.position = previousTile.transform.position;
+        tileCursor.transform.position = previousTile.transform.position;
 
         //Debug.Log(previousTile.name);
     }
