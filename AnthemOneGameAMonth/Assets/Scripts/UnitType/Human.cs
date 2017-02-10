@@ -42,9 +42,23 @@ public class Human : Entity {
         }
     }
 
+    public int Speed
+    {
+        get
+        {
+            return speed;
+        }
+        set
+        {
+            speed = value;
+        }
+    }
+
     public void MoveTo(GameObject target)
     {
         StartCoroutine(AnimateMovement(target.transform.position));
+        x = target.GetComponent<Tile>().x;
+        y = target.GetComponent<Tile>().y;
     }
 
     IEnumerator AnimateMovement(Vector3 target)

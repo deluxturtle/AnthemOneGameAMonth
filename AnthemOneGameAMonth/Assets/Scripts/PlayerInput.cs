@@ -19,6 +19,7 @@ public class PlayerInput : MonoBehaviour {
     private GameObject selectedTile;
     private bool hitTile = false;
     private List<Tile> allTiles = new List<Tile>();
+    private List<GameObject> moveableTiles = new List<GameObject>();
 
     void Start()
     {
@@ -114,9 +115,17 @@ public class PlayerInput : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Lets the player select the tile he wants to move the unit to with pathfinding.
+    /// </summary>
     IEnumerator SelectDestination()
     {
         Debug.Log("Select tile to move to.");
+        moveableTiles = new List<GameObject>();
+        HighlightMoveableTiles(selectedEnt);
+        yield return new WaitForEndOfFrame();
+
+
         while (true)
         {
             if (selectedTile != null && Input.GetButtonDown("Fire1"))
@@ -145,5 +154,19 @@ public class PlayerInput : MonoBehaviour {
         tileCursor.transform.position = previousTile.transform.position;
 
         //Debug.Log(previousTile.name);
+    }
+
+    void HighlightMoveableTiles(GameObject selectedUnit)
+    {
+        Human humanInfo = selectedEnt.GetComponent<Human>();
+        int speed = humanInfo.Speed;
+        //Full fill 
+        //lets get the first surrounding tiles
+
+    }
+
+    void AddNeighbors(Human human, List<GameObject> pMoveableTiles, bool highlightOccupied)
+    {
+        
     }
 }

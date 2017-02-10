@@ -54,6 +54,8 @@ public class LoadFromXML : MonoBehaviour {
         int height = int.Parse(xmlDoc.SelectSingleNode("map").Attributes["height"].Value);
 
         Tile[,] allTiles = new Tile[width, height];
+
+        GameObject collisionParent = new GameObject("CollisionGridLayer");
         
         for (int i = 0; i < height; i++)
         {
@@ -67,6 +69,8 @@ public class LoadFromXML : MonoBehaviour {
                 tempSprite.AddComponent<BoxCollider2D>();
                 //set position
                 tempSprite.transform.position = new Vector3((tileWidth * i), (tileHeight * j));
+                tempSprite.tag = "Tile";
+                tempSprite.transform.parent = collisionParent.transform;
             }
         }
 
@@ -139,7 +143,7 @@ public class LoadFromXML : MonoBehaviour {
                         parent.name = layerInfo.Attributes["name"].Value + "Layer";
                     }
                     tempSprite.transform.parent = GameObject.Find(layerInfo.Attributes["name"].Value + "Layer").transform;
-                    tempSprite.tag = "Tile";
+                    //tempSprite.tag = "Tile";
                     
 
                     if (layerInfo.Attributes["name"].Value == "Background")
@@ -157,10 +161,13 @@ public class LoadFromXML : MonoBehaviour {
                                 Debug.Log("Found villager");
                                 tempSprite.name = "Villager";
                                 Human tempHuman = tempSprite.AddComponent<Human>();
+                                tempHuman.x = horizontalIndex;
+                                tempHuman.y = verticalIndex;
                                 tempHuman.ClassType = Class.Villager;
                                 break;
                         }
                     }
+                    
 
 
                 }
