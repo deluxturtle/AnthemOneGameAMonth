@@ -65,7 +65,7 @@ public class LoadFromXML : MonoBehaviour {
                 Tile tempTile = tempSprite.AddComponent<Tile>();
                 tempTile.x = i;
                 tempTile.y = j;
-                allTiles[j, i] = tempTile;
+                allTiles[i, j] = tempTile;
                 tempSprite.AddComponent<BoxCollider2D>();
                 //set position
                 tempSprite.transform.position = new Vector3((tileWidth * i), (tileHeight * j));
@@ -73,13 +73,14 @@ public class LoadFromXML : MonoBehaviour {
                 tempSprite.transform.parent = collisionParent.transform;
             }
         }
+        Debug.Log(allTiles.Length);
 
         Debug.Log("Building Connections...");
         //Build Basic Connections
         foreach(Tile tile in allTiles)
         {
             //Left
-            if (tile.x - 1 > 0)
+            if (tile.x - 1 >= 0)
             {
                 tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x - 1, tile.y].gameObject, 1));
             }
@@ -87,7 +88,7 @@ public class LoadFromXML : MonoBehaviour {
             {
                 tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x + 1, tile.y].gameObject, 1));
             }
-            if(tile.y - 1 > 0)
+            if(tile.y - 1 >= 0)
             {
                 tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x, tile.y - 1].gameObject, 1));
             }
@@ -158,12 +159,18 @@ public class LoadFromXML : MonoBehaviour {
                         {
                             case VILLAGER_BLU_M:
                             case VILLAGER_M:
-                                Debug.Log("Found villager");
                                 tempSprite.name = "Villager";
                                 Human tempHuman = tempSprite.AddComponent<Human>();
                                 tempHuman.x = horizontalIndex;
                                 tempHuman.y = verticalIndex;
                                 tempHuman.ClassType = Class.Villager;
+                                foreach(Transform tilObj in collisionParent.transform)
+                                {
+                                    if(tilObj.GetComponent<Tile>().x == tempHuman.x && tilObj.GetComponent<Tile>().y == tempHuman.y)
+                                    {
+                                        tempHuman.tileOccuping = tilObj.GetComponent<Tile>();
+                                    }
+                                }
                                 break;
                         }
                     }

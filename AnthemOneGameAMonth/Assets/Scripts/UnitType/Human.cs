@@ -21,6 +21,7 @@ public enum Class
 public class Human : Entity {
 
     public float moveAnimationSpeed = 2f;
+    public Tile tileOccuping;
 
     private Class classType;
     private int speed;
@@ -59,6 +60,7 @@ public class Human : Entity {
         StartCoroutine(AnimateMovement(target.transform.position));
         x = target.GetComponent<Tile>().x;
         y = target.GetComponent<Tile>().y;
+        tileOccuping = target.GetComponent<Tile>();
     }
 
     IEnumerator AnimateMovement(Vector3 target)
@@ -68,13 +70,16 @@ public class Human : Entity {
         float elapsedTime = 0;
         float timeNeeded = (Vector3.Distance(startPos, target) / moveAnimationSpeed);
 
-        while(elapsedTime <= timeNeeded)
+        if(elapsedTime != timeNeeded)
         {
-            transform.position = Vector3.Lerp(startPos, target, (elapsedTime / timeNeeded));
-            elapsedTime += Time.deltaTime;
-            yield return null;
+            while (elapsedTime <= timeNeeded)
+            {
+                transform.position = Vector3.Lerp(startPos, target, (elapsedTime / timeNeeded));
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+            transform.position = target;
         }
-        transform.position = target;
     }
 
 }

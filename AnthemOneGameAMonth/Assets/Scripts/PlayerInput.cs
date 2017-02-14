@@ -12,6 +12,8 @@ public class PlayerInput : MonoBehaviour {
     public GameObject cursor;
     [Tooltip("Square Cursor for seeing your selection on the grid.")]
     public GameObject tileCursor;
+    public GameObject highlightGraphic;
+
 
     private Plane plane = new Plane();
     private GameObject selectedEnt = null;
@@ -20,6 +22,7 @@ public class PlayerInput : MonoBehaviour {
     private bool hitTile = false;
     private List<Tile> allTiles = new List<Tile>();
     private List<GameObject> moveableTiles = new List<GameObject>();
+    private List<GameObject> tileHighlights = new List<GameObject>(); //for deleting all the graphics later.
 
     void Start()
     {
@@ -67,11 +70,6 @@ public class PlayerInput : MonoBehaviour {
                 {
                     if (Vector3.Distance(tile.transform.position, mousePos) < Vector2.Distance(previousTile.transform.position, mousePos))
                     {
-                        if (tile != previousTile)
-                        {
-                            selectedTile = tile;
-                            //selectedTile.GetComponent<Renderer>().material.color = Color.yellow;
-                        }
                         if (selectedTile != previousTile)
                         {
                             UpdateSelectedTile();
@@ -101,10 +99,8 @@ public class PlayerInput : MonoBehaviour {
                         if (tileScript.x == selectedTileScript.x && tileScript.y == selectedTileScript.y)
                         {
                             selectedEnt = tileScript.gameObject;
-                            Debug.Log("Selected: " + selectedEnt.name);
-                            yield return new WaitForEndOfFrame();
-                            StartCoroutine("SelectDestination");
                             selectedUnit = true;
+                            yield return new WaitForFixedUpdate();
                             break;
                         }
                     }
@@ -113,6 +109,7 @@ public class PlayerInput : MonoBehaviour {
             }
             yield return null;
         }
+        StartCoroutine("SelectDestination");
     }
 
     /// <summary>
@@ -123,21 +120,27 @@ public class PlayerInput : MonoBehaviour {
         Debug.Log("Select tile to move to.");
         moveableTiles = new List<GameObject>();
         HighlightMoveableTiles(selectedEnt);
-        yield return new WaitForEndOfFrame();
 
 
         while (true)
         {
-            if (selectedTile != null && Input.GetButtonDown("Fire1"))
+            if (selectedTile != null && selectedEnt != null && Input.GetButtonDown("Fire1"))
             {
                 selectedEnt.GetComponent<Human>().MoveTo(selectedTile);
-                
+                yield return new WaitForFixedUpdate();
                 break;
             }
             yield return null;
         }
+
+        //clear highlihgt?
+        foreach (GameObject highlight in tileHighlights)
+        {
+            Destroy(highlight);
+        }
+        moveableTiles.Clear();
         StartCoroutine("SelectUnit");
-        StopCoroutine("SelectDestination");
+
     }
 
     /// <summary>
@@ -146,10 +149,10 @@ public class PlayerInput : MonoBehaviour {
     void UpdateSelectedTile()
     {
         //Change stuff on the previous.
-        if (previousTile != null)
-        {
-            //previousTile.GetComponent<Renderer>().material.color = Color.black;
-        }
+        //if (previousTile != null)
+        //{
+        //    //previousTile.GetComponent<Renderer>().material.color = Color.black;
+        //}
         previousTile = selectedTile;
         tileCursor.transform.position = previousTile.transform.position;
 
@@ -158,15 +161,40 @@ public class PlayerInput : MonoBehaviour {
 
     void HighlightMoveableTiles(GameObject selectedUnit)
     {
+
+        //Clear tile range values
+
+
         Human humanInfo = selectedEnt.GetComponent<Human>();
         int speed = humanInfo.Speed;
         //Full fill 
         //lets get the first surrounding tiles
+        AddNeighbors(1, humanInfo, moveableTiles, false);
+
+        //add highlight graphic to scene
+        foreach(GameObject tile in moveableTiles)
+        {
+            GameObject tileHighlight = (GameObject)Instantiate(highlightGraphic, tile.transform.position, Quaternion.identity);
+            tileHighlights.Add(tileHighlight);
+
+        }
+
+        Debug.Log(moveableTiles.Count);
 
     }
 
-    void AddNeighbors(Human human, List<GameObject> pMoveableTiles, bool highlightOccupied)
+    void AddNeighbors(int pRange, Human human, List<GameObject> pMoTiles, bool highlightOccupied)
     {
+        Tile unitTile = human.tileOccuping;
         
+        foreach(ScriptConnection connection in unitTile.Connections)
+        {
+            Tile goingTo = connection.goingTo.GetComponent<Tile>();
+
+            if (!pMoTiles.Contains(goingTo.gameObject))
+            {
+                pMoTiles.Add(goingTo.gameObject);
+            }
+        }
     }
 }
