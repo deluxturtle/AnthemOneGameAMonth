@@ -13,13 +13,16 @@ public class LoadFromXML : MonoBehaviour {
     public int layerWidth;
     public int layerHeight;
 
+    GameObject collisionParent;
     private Sprite[] spriteTiles;
     //Villager male
     private const int VILLAGER_M = 90;
     private const int VILLAGER_BLU_M = 245;
+    private const int KNIGHT = 114;
     
     void Awake()
     {
+        collisionParent = new GameObject("CollisionGridLayer");
         StartCoroutine("LoadMap");
     }
 
@@ -55,7 +58,7 @@ public class LoadFromXML : MonoBehaviour {
 
         Tile[,] allTiles = new Tile[width, height];
 
-        GameObject collisionParent = new GameObject("CollisionGridLayer");
+
         
         for (int i = 0; i < height; i++)
         {
@@ -73,9 +76,7 @@ public class LoadFromXML : MonoBehaviour {
                 tempSprite.transform.parent = collisionParent.transform;
             }
         }
-        Debug.Log(allTiles.Length);
 
-        Debug.Log("Building Connections...");
         //Build Basic Connections
         foreach(Tile tile in allTiles)
         {
@@ -97,7 +98,6 @@ public class LoadFromXML : MonoBehaviour {
                 tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x, tile.y + 1].gameObject, 1));
             }
         }
-        Debug.Log("Connections built.");
 
 
 
@@ -164,13 +164,17 @@ public class LoadFromXML : MonoBehaviour {
                                 tempHuman.x = horizontalIndex;
                                 tempHuman.y = verticalIndex;
                                 tempHuman.ClassType = Class.Villager;
-                                foreach(Transform tilObj in collisionParent.transform)
-                                {
-                                    if(tilObj.GetComponent<Tile>().x == tempHuman.x && tilObj.GetComponent<Tile>().y == tempHuman.y)
-                                    {
-                                        tempHuman.tileOccuping = tilObj.GetComponent<Tile>();
-                                    }
-                                }
+                                FindParent(tempHuman);
+                                break;
+                            case KNIGHT:
+                                tempSprite.name = "Knight";
+                                Human knight = tempSprite.AddComponent<Human>();
+                                knight.x = horizontalIndex;
+                                knight.y = verticalIndex;
+                                knight.ClassType = Class.Knight;
+                                FindParent(knight);
+                                break;
+                            default:
                                 break;
                         }
                     }
@@ -190,5 +194,16 @@ public class LoadFromXML : MonoBehaviour {
 
         }
         yield break;
+    }
+
+    void FindParent(Human human)
+    {
+        foreach (Transform tilObj in collisionParent.transform)
+        {
+            if (tilObj.GetComponent<Tile>().x == human.x && tilObj.GetComponent<Tile>().y == human.y)
+            {
+                human.tileOccuping = tilObj.GetComponent<Tile>();
+            }
+        }
     }
 }

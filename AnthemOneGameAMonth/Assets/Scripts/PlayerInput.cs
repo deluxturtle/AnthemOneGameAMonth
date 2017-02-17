@@ -100,7 +100,6 @@ public class PlayerInput : MonoBehaviour {
 
     IEnumerator SelectUnit()
     {
-        Debug.Log("Get selection");
         bool selectedUnit = false;
         while (!selectedUnit)
         {
@@ -133,7 +132,6 @@ public class PlayerInput : MonoBehaviour {
     /// </summary>
     IEnumerator SelectDestination()
     {
-        Debug.Log("Select tile to move to.");
         moveableTiles = new List<GameObject>();
         HighlightMoveableTiles(selectedEnt);
 
@@ -171,15 +169,8 @@ public class PlayerInput : MonoBehaviour {
     /// </summary>
     void UpdateSelectedTile()
     {
-        //Change stuff on the previous.
-        //if (previousTile != null)
-        //{
-        //    //previousTile.GetComponent<Renderer>().material.color = Color.black;
-        //}
         previousTile = selectedTile;
         tileCursor.transform.position = previousTile.transform.position;
-
-        //Debug.Log(previousTile.name);
     }
 
     void HighlightMoveableTiles(GameObject selectedUnit)
@@ -193,10 +184,11 @@ public class PlayerInput : MonoBehaviour {
 
         Human humanInfo = selectedEnt.GetComponent<Human>();
         int speed = humanInfo.Speed;
-        Debug.Log(speed);
+
         //Full fill 
         //lets get the first surrounding tiles
-        AddNeighbors(1, humanInfo, moveableTiles, false);
+        AddNeighbors(1, humanInfo.tileOccuping, moveableTiles, false);
+
         for(int range = 1; range <= speed; range++)
         {
             foreach(GameObject tile in GameObject.FindGameObjectsWithTag("Tile"))
@@ -204,7 +196,9 @@ public class PlayerInput : MonoBehaviour {
                 if(tile.GetComponent<Tile>().range == range)
                 {
                     if (range < speed)
+                    {
                         AddNeighbors(range + 1, tile.GetComponent<Tile>(), moveableTiles, false);
+                    }
                 }
             }
         }
@@ -223,7 +217,6 @@ public class PlayerInput : MonoBehaviour {
 
     void AddNeighbors(int pRange, Tile tileInfo, List<GameObject> pMoTiles, bool highlightOccupied)
     {
-        
         foreach(ScriptConnection connection in tileInfo.Connections)
         {
             Tile goingTo = connection.goingTo.GetComponent<Tile>();

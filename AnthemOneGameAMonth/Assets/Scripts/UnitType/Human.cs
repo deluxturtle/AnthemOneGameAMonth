@@ -9,6 +9,7 @@ using System.Collections.Generic;
 public enum Class
 {
     Villager,
+    Knight,
     Farmer,
     Swordsman,
     Archer
@@ -33,7 +34,7 @@ public class Human : Entity {
             switch (classType)
             {
                 case Class.Villager:
-                    speed = 5;
+                    speed = 3;
                     break;
             }
         }
