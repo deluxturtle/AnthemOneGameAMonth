@@ -24,7 +24,7 @@ public class Human : Entity {
     public Tile tileOccuping;
 
     private Class classType;
-    private int speed;
+    public int speed;
 
     public Class ClassType {
         set
@@ -33,7 +33,7 @@ public class Human : Entity {
             switch (classType)
             {
                 case Class.Villager:
-                    speed = 1;
+                    speed = 5;
                     break;
             }
         }

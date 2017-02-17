@@ -13,6 +13,7 @@ public class PlayerInput : MonoBehaviour {
     [Tooltip("Square Cursor for seeing your selection on the grid.")]
     public GameObject tileCursor;
     public GameObject highlightGraphic;
+    public AudioClip clickSFX;
 
 
     private Plane plane = new Plane();
@@ -23,9 +24,18 @@ public class PlayerInput : MonoBehaviour {
     private List<Tile> allTiles = new List<Tile>();
     private List<GameObject> moveableTiles = new List<GameObject>();
     private List<GameObject> tileHighlights = new List<GameObject>(); //for deleting all the graphics later.
+    private AudioSource audioSrc;
+    private bool leftMouseClick = false;
 
     void Start()
     {
+        audioSrc = GetComponent<AudioSource>();
+        if(audioSrc == null)
+        {
+            audioSrc = gameObject.AddComponent<AudioSource>();
+        }
+        audioSrc.clip = clickSFX;
+
         Cursor.visible = false;
         plane.SetNormalAndPosition(Vector3.forward, Vector3.up);
         foreach(Tile tile in GameObject.FindObjectsOfType<Tile>())
@@ -80,6 +90,12 @@ public class PlayerInput : MonoBehaviour {
         }
 
         cursor.transform.position = mousePos;
+
+        //Get input
+        if (Input.GetButtonDown("Fire1"))
+        {
+            audioSrc.Play();
+        }
     }
 
     IEnumerator SelectUnit()
@@ -124,10 +140,17 @@ public class PlayerInput : MonoBehaviour {
 
         while (true)
         {
+            //If nothing is null.
             if (selectedTile != null && selectedEnt != null && Input.GetButtonDown("Fire1"))
             {
-                selectedEnt.GetComponent<Human>().MoveTo(selectedTile);
-                yield return new WaitForFixedUpdate();
+                Tile sTile = selectedTile.GetComponent<Tile>();
+                //If so Move there!!
+                if (moveableTiles.Contains(moveableTiles.Find(tile => (tile.GetComponent<Tile>().x == sTile.x && tile.GetComponent<Tile>().y == sTile.y))))
+                {
+                    selectedEnt.GetComponent<Human>().MoveTo(selectedTile);
+                    yield return new WaitForFixedUpdate();
+                    break;
+                }
                 break;
             }
             yield return null;
@@ -163,13 +186,29 @@ public class PlayerInput : MonoBehaviour {
     {
 
         //Clear tile range values
-
+        foreach(GameObject tile in GameObject.FindGameObjectsWithTag("Tile"))
+        {
+            tile.GetComponent<Tile>().range = 0;
+        }
 
         Human humanInfo = selectedEnt.GetComponent<Human>();
         int speed = humanInfo.Speed;
+        Debug.Log(speed);
         //Full fill 
         //lets get the first surrounding tiles
         AddNeighbors(1, humanInfo, moveableTiles, false);
+        for(int range = 1; range <= speed; range++)
+        {
+            foreach(GameObject tile in GameObject.FindGameObjectsWithTag("Tile"))
+            {
+                if(tile.GetComponent<Tile>().range == range)
+                {
+                    if (range < speed)
+                        AddNeighbors(range + 1, tile.GetComponent<Tile>(), moveableTiles, false);
+                }
+            }
+        }
+
 
         //add highlight graphic to scene
         foreach(GameObject tile in moveableTiles)
@@ -178,21 +217,20 @@ public class PlayerInput : MonoBehaviour {
             tileHighlights.Add(tileHighlight);
 
         }
-
-        Debug.Log(moveableTiles.Count);
+        
 
     }
 
-    void AddNeighbors(int pRange, Human human, List<GameObject> pMoTiles, bool highlightOccupied)
+    void AddNeighbors(int pRange, Tile tileInfo, List<GameObject> pMoTiles, bool highlightOccupied)
     {
-        Tile unitTile = human.tileOccuping;
         
-        foreach(ScriptConnection connection in unitTile.Connections)
+        foreach(ScriptConnection connection in tileInfo.Connections)
         {
             Tile goingTo = connection.goingTo.GetComponent<Tile>();
 
             if (!pMoTiles.Contains(goingTo.gameObject))
             {
+                goingTo.range += pRange;
                 pMoTiles.Add(goingTo.gameObject);
             }
         }
