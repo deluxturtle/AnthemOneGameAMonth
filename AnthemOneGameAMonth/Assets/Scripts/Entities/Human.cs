@@ -22,10 +22,9 @@ public enum Class
 public class Human : Entity {
 
     public float moveAnimationSpeed = 2f;
-    public Tile tileOccuping;
 
     private Class classType;
-    public int speed;
+    private int speed;
 
     public Class ClassType {
         set
@@ -56,12 +55,20 @@ public class Human : Entity {
         }
     }
 
+    public void SetupHuman(Class pType, Faction pFaction, int x, int y)
+    {
+        ClassType = pType;
+        Faction = pFaction;
+    }
+
     public void MoveTo(GameObject target)
     {
+        tileOccuping.isOccupied = false;
         StartCoroutine(AnimateMovement(target.transform.position));
         x = target.GetComponent<Tile>().x;
         y = target.GetComponent<Tile>().y;
         tileOccuping = target.GetComponent<Tile>();
+        target.GetComponent<Tile>().isOccupied = true;
     }
 
     IEnumerator AnimateMovement(Vector3 target)

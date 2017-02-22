@@ -139,7 +139,7 @@ public class PlayerInput : MonoBehaviour {
         while (true)
         {
             //If nothing is null.
-            if (selectedTile != null && selectedEnt != null && Input.GetButtonDown("Fire1"))
+            if (selectedTile != null && selectedEnt != null && Input.GetButtonDown("Fire1") && !selectedTile.GetComponent<Tile>().isOccupied)
             {
                 Tile sTile = selectedTile.GetComponent<Tile>();
                 //If so Move there!!
@@ -223,7 +223,7 @@ public class PlayerInput : MonoBehaviour {
 
             if (!pMoTiles.Contains(goingTo.gameObject))
             {
-                goingTo.range += pRange;
+                goingTo.range += pRange + connection.cost;
                 pMoTiles.Add(goingTo.gameObject);
             }
         }
