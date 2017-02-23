@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Xml;
 using System.Collections;
+using System.Collections.Generic;
 
 /// <summary>
 /// Author: Andrew Seba
@@ -12,12 +13,19 @@ public class LoadFromXML : MonoBehaviour {
     public int layerWidth;
     public int layerHeight;
 
+    GameObject collisionParent;
     private Sprite[] spriteTiles;
-    //Villager male
+    //Entities
     private const int VILLAGER_M = 90;
+    private const int VILLAGER_BLU_M = 245;
+    private const int VILLAGER_RED_M = 252;
+    private const int KNIGHT = 114;
+    //Terrain
+    private const int FOREST = 6;
     
     void Awake()
     {
+        collisionParent = new GameObject("CollisionGridLayer");
         StartCoroutine("LoadMap");
     }
 
@@ -48,8 +56,13 @@ public class LoadFromXML : MonoBehaviour {
         float tileHeight = (float.Parse(tilesetInfo.Attributes["tileheight"].Value) / (float)16);
 
         //Generate Collision grid for mouse input.
-        float width = float.Parse(xmlDoc.SelectSingleNode("map").Attributes["width"].Value);
-        float height = float.Parse(xmlDoc.SelectSingleNode("map").Attributes["height"].Value);
+        int width = int.Parse(xmlDoc.SelectSingleNode("map").Attributes["width"].Value);
+        int height = int.Parse(xmlDoc.SelectSingleNode("map").Attributes["height"].Value);
+
+        Tile[,] allTiles = new Tile[width, height];
+
+
+        
         for (int i = 0; i < height; i++)
         {
             for(int j = 0; j < width; j++)
@@ -58,11 +71,38 @@ public class LoadFromXML : MonoBehaviour {
                 Tile tempTile = tempSprite.AddComponent<Tile>();
                 tempTile.x = i;
                 tempTile.y = j;
+                allTiles[i, j] = tempTile;
                 tempSprite.AddComponent<BoxCollider2D>();
                 //set position
                 tempSprite.transform.position = new Vector3((tileWidth * i), (tileHeight * j));
+                tempSprite.tag = "Tile";
+                tempSprite.transform.parent = collisionParent.transform;
             }
         }
+
+        //Build Basic Connections
+        foreach(Tile tile in allTiles)
+        {
+            //Left
+            if (tile.x - 1 >= 0)
+            {
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x - 1, tile.y].gameObject, 1));
+            }
+            if(tile.x + 1 < width)
+            {
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x + 1, tile.y].gameObject, 1));
+            }                                                                                                       
+            if(tile.y - 1 >= 0)                                                                                     
+            {                                                                                                       
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x, tile.y - 1].gameObject, 1));
+            }                                                                                                       
+            if(tile.y + 1 < height)                                                                                 
+            {                                                                                                       
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x, tile.y + 1].gameObject, 1));
+            }
+        }
+
+
 
         //for each layer that exists
         foreach (XmlNode layerInfo in layerNames)
@@ -88,11 +128,7 @@ public class LoadFromXML : MonoBehaviour {
 
                     //Create a sprite
                     GameObject tempSprite = new GameObject(layerInfo.Attributes["name"].Value + " <" + horizontalIndex + ", " + verticalIndex + ">");
-
-                    //add the tile script to it
-                    Tile tempTile = tempSprite.AddComponent<Tile>();
-                    tempTile.x = horizontalIndex;
-                    tempTile.y = verticalIndex;
+                    
 
                     //Make a sprite renderer.
                     SpriteRenderer spriteRend = tempSprite.AddComponent<SpriteRenderer>();
@@ -111,26 +147,66 @@ public class LoadFromXML : MonoBehaviour {
                         parent.name = layerInfo.Attributes["name"].Value + "Layer";
                     }
                     tempSprite.transform.parent = GameObject.Find(layerInfo.Attributes["name"].Value + "Layer").transform;
-                    tempSprite.tag = "Tile";
+                    //tempSprite.tag = "Tile";
                     
 
                     if (layerInfo.Attributes["name"].Value == "Background")
                     {
                         
                     }
-
-                    if(layerInfo.Attributes["name"].Value == "Entities")
+                    else if (layerInfo.Attributes["name"].Value == "Entities")
                     {
                         tempSprite.tag = "Entity";
-                        switch (spriteValue-1)
+                        
+                        int value = spriteValue - 1;
+                        switch (value)
                         {
+                            case VILLAGER_BLU_M:
                             case VILLAGER_M:
-                                Debug.Log("Found villager");
                                 tempSprite.name = "Villager";
-                                tempSprite.AddComponent<Human>();
+                                Human tempVillager = tempSprite.AddComponent<Human>();
+                                if(value == VILLAGER_BLU_M)
+                                {
+                                    tempVillager.SetupHuman(Class.Villager, Faction.Blue, horizontalIndex, verticalIndex);
+                                }
+                                else if(value == VILLAGER_RED_M)
+                                {
+                                    tempVillager.SetupHuman(Class.Villager, Faction.Red, horizontalIndex, verticalIndex);
+                                }
+                                FindParent(tempVillager);
+                                break;
+                            case KNIGHT:
+                                tempSprite.name = "Knight";
+                                Human knight = tempSprite.AddComponent<Human>();
+                                knight.x = horizontalIndex;
+                                knight.y = verticalIndex;
+                                knight.ClassType = Class.Knight;
+                                FindParent(knight);
+                                break;
+                            default:
+                                Debug.Log("Unknown Entity placed in map(no info loaded for sprite index: " + (spriteValue - 1) + ").");
+                                break;
+                        }
+
+                        
+                    }
+                    else if(layerInfo.Attributes["name"].Value == "Terrain")
+                    {
+                        switch(spriteValue - 1)
+                        {
+                            case FOREST:
+                                tempSprite.name = "Forest";
+                                Terrain tempForest = tempSprite.AddComponent<Terrain>();
+                                tempForest.x = horizontalIndex;
+                                tempForest.y = verticalIndex;
+                                tempForest.terrainType = TerrainType.Forest;
+                                FindParent(tempForest);
+                                break;
+                            default:
                                 break;
                         }
                     }
+                    
 
 
                 }
@@ -144,7 +220,54 @@ public class LoadFromXML : MonoBehaviour {
                 }
             }
 
-        }
+        }//End of placing sprites
+        //rebuild costs in the connections
+
         yield break;
+    }
+
+    void FindParent(Tile tile)
+    {
+        foreach (Transform tilObj in collisionParent.transform)
+        {
+            if (tilObj.GetComponent<Tile>().x == tile.x && tilObj.GetComponent<Tile>().y == tile.y)
+            {
+                Tile tileScript = tilObj.GetComponent<Tile>();
+                if (tile is Human)
+                {
+                    Human tempHuman = (Human)tile;
+                    tempHuman.tileOccuping = tileScript;
+                    tileScript.occupiedBy = tempHuman;
+                }
+                else if (tile is Terrain)
+                {
+                    Terrain tempTerrain = (Terrain)tile;
+                    int terrainCost = 0;
+                    switch (tempTerrain.terrainType)
+                    {
+                        case TerrainType.Forest:
+                            terrainCost = 2;
+                            break;
+                        default:
+                            terrainCost = 0;
+                            break;
+                    }
+                    foreach(ScriptConnection conn in tileScript.Connections)
+                    {
+                        Tile surroundingForest = conn.goingTo.GetComponent<Tile>();
+                        
+                        foreach(ScriptConnection goingToForest in surroundingForest.Connections)
+                        {
+                            if(goingToForest.goingTo == tileScript.gameObject)
+                            {
+                                goingToForest.cost = terrainCost;
+                                break;
+                            }
+                        }
+                    }
+                    
+                }
+            }
+        }
     }
 }

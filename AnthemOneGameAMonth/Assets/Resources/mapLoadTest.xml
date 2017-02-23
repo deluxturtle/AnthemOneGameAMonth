@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="16" tileheight="16" nextobjectid="1">
  <tileset firstgid="1" name="Tile-set - Toen's Medieval Strategy (16x16) - v.1.0" tilewidth="16" tileheight="16" tilecount="364" columns="7">
-  <image source="../Sprites/Toen/Resources/Tile-set - Toen's Medieval Strategy (16x16) - v.1.0.png" width="112" height="832"/>
+  <image source="../Sprites/Toen/Resources/Tile-set(Toen's).png" width="112" height="832"/>
  </tileset>
- <layer name="Background" width="10" height="10">
+ <layer name="Background" width="10" height="10" visible="0">
   <data>
    <tile gid="1"/>
    <tile gid="2"/>
@@ -107,7 +107,7 @@
    <tile gid="4"/>
   </data>
  </layer>
- <layer name="Buildings" width="10" height="10">
+ <layer name="Buildings" width="10" height="10" visible="0">
   <data>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -388,8 +388,8 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="91"/>
-   <tile gid="91"/>
+   <tile gid="246"/>
+   <tile gid="246"/>
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
@@ -399,7 +399,7 @@
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
-   <tile gid="91"/>
+   <tile gid="246"/>
    <tile gid="0"/>
    <tile gid="0"/>
    <tile gid="0"/>
