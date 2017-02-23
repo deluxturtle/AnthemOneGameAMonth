@@ -165,15 +165,15 @@ public class LoadFromXML : MonoBehaviour {
                             case VILLAGER_M:
                                 tempSprite.name = "Villager";
                                 Human tempVillager = tempSprite.AddComponent<Human>();
-                                tempVillager.SetupHuman(Class.Villager, Faction.Blue, horizontalIndex, verticalIndex);
                                 FindParent(tempVillager);
                                 if(value == VILLAGER_BLU_M)
                                 {
-                                    tempVillager.Faction = Faction.Blue;
+                                    Debug.Log("Setting up Villager blue");
+                                    tempVillager.SetupHuman(Class.Villager, Faction.Blue, horizontalIndex, verticalIndex);
                                 }
                                 else if(value == VILLAGER_RED_M)
                                 {
-                                    tempVillager.Faction = Faction.Red;
+                                    tempVillager.SetupHuman(Class.Villager, Faction.Red, horizontalIndex, verticalIndex);
                                 }
                                 break;
                             case KNIGHT:

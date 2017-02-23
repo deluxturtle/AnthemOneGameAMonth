@@ -109,11 +109,12 @@ public class PlayerInput : MonoBehaviour {
                 {
                     Tile tileScript = entity.GetComponent<Tile>();
                     Tile selectedTileScript = selectedTile.GetComponent<Tile>();
-                    if (tileScript != null && tileScript.gameObject.GetComponent<Human>() != null)
+                    if(tileScript is Human)
                     {
-                        if (tileScript.x == selectedTileScript.x && tileScript.y == selectedTileScript.y)
+                        Human tempHuman = (Human)tileScript;
+                        if(tempHuman.tileOccuping == selectedTileScript)
                         {
-                            selectedEnt = tileScript.gameObject;
+                            selectedEnt = tempHuman.gameObject;
                             selectedUnit = true;
                             yield return new WaitForFixedUpdate();
                             break;
@@ -132,6 +133,7 @@ public class PlayerInput : MonoBehaviour {
     /// </summary>
     IEnumerator SelectDestination()
     {
+        Debug.Log("Select Destination");
         moveableTiles = new List<GameObject>();
         HighlightMoveableTiles(selectedEnt);
 

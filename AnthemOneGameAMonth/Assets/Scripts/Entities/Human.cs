@@ -55,10 +55,12 @@ public class Human : Entity {
         }
     }
 
-    public void SetupHuman(Class pType, Faction pFaction, int x, int y)
+    public void SetupHuman(Class pType, Faction pFaction, int pX, int pY)
     {
         ClassType = pType;
         Faction = pFaction;
+        x = pX;
+        y = pY;
     }
 
     public void MoveTo(GameObject target)
