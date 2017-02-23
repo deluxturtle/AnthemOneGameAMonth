@@ -86,19 +86,19 @@ public class LoadFromXML : MonoBehaviour {
             //Left
             if (tile.x - 1 >= 0)
             {
-                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x - 1, tile.y].gameObject, 0));
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x - 1, tile.y].gameObject, 1));
             }
             if(tile.x + 1 < width)
             {
-                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x + 1, tile.y].gameObject, 0));
-            }
-            if(tile.y - 1 >= 0)
-            {
-                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x, tile.y - 1].gameObject, 0));
-            }
-            if(tile.y + 1 < height)
-            {
-                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x, tile.y + 1].gameObject, 0));
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x + 1, tile.y].gameObject, 1));
+            }                                                                                                       
+            if(tile.y - 1 >= 0)                                                                                     
+            {                                                                                                       
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x, tile.y - 1].gameObject, 1));
+            }                                                                                                       
+            if(tile.y + 1 < height)                                                                                 
+            {                                                                                                       
+                tile.Connections.Add(new ScriptConnection(tile.gameObject, allTiles[tile.x, tile.y + 1].gameObject, 1));
             }
         }
 
@@ -165,16 +165,15 @@ public class LoadFromXML : MonoBehaviour {
                             case VILLAGER_M:
                                 tempSprite.name = "Villager";
                                 Human tempVillager = tempSprite.AddComponent<Human>();
-                                FindParent(tempVillager);
                                 if(value == VILLAGER_BLU_M)
                                 {
-                                    Debug.Log("Setting up Villager blue");
                                     tempVillager.SetupHuman(Class.Villager, Faction.Blue, horizontalIndex, verticalIndex);
                                 }
                                 else if(value == VILLAGER_RED_M)
                                 {
                                     tempVillager.SetupHuman(Class.Villager, Faction.Red, horizontalIndex, verticalIndex);
                                 }
+                                FindParent(tempVillager);
                                 break;
                             case KNIGHT:
                                 tempSprite.name = "Knight";
@@ -238,7 +237,7 @@ public class LoadFromXML : MonoBehaviour {
                 {
                     Human tempHuman = (Human)tile;
                     tempHuman.tileOccuping = tileScript;
-                    tileScript.isOccupied = true;
+                    tileScript.occupiedBy = tempHuman;
                 }
                 else if (tile is Terrain)
                 {
@@ -247,7 +246,7 @@ public class LoadFromXML : MonoBehaviour {
                     switch (tempTerrain.terrainType)
                     {
                         case TerrainType.Forest:
-                            terrainCost = 1;
+                            terrainCost = 2;
                             break;
                         default:
                             terrainCost = 0;

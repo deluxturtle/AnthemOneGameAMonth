@@ -5,7 +5,7 @@ using System.Collections;
 
 public class ScriptDijkstra {
     
-    public List<GameObject> PathFindDijkstra(GameObject start, GameObject goal)
+    public List<GameObject> PathFindDijkstra(GameObject start, GameObject goal, Human human)
     {
         //initialize first node
         ScriptNodeRecord startRecord = new ScriptNodeRecord();
@@ -32,12 +32,13 @@ public class ScriptDijkstra {
             //get its outgoing connections
             List<ScriptConnection> connections = current.node.GetComponent<Tile>().Connections;
 
+
             foreach (ScriptConnection connection in connections)
             {
                 ScriptNodeRecord endNode = new ScriptNodeRecord();
                 endNode.node = connection.goingTo;
-
-                if (!endNode.node.GetComponent<Tile>().isOccupied)
+                
+                if (!endNode.node.GetComponent<Tile>().IsOccupied() || endNode.node.GetComponent<Tile>().occupiedBy.Faction == human.Faction)
                 {
                     //get the cost estimate for the end node
                     endNode.connection = current;
@@ -53,9 +54,8 @@ public class ScriptDijkstra {
                     {
                         //here we find the record in the open list
                         //corresponding to the endNode
-                        endNode = open.list.Find(item => item == endNode);
-
-                        if (endNode.costSoFar <= endNodeCost)
+                        ScriptNodeRecord endNodeRecord = open.list.Find(item => item == endNode);
+                        if (endNodeRecord.costSoFar <= endNodeCost)
                         {
                             continue;
                         }

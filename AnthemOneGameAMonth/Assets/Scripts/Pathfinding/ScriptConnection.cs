@@ -5,7 +5,7 @@ public class ScriptConnection {
 
     public GameObject from;
     public GameObject goingTo;
-    public int cost;
+    public int cost = 1;
 
     public ScriptConnection(GameObject pFrom, GameObject pGoing, int pCost)
     {

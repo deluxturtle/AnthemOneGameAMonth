@@ -9,6 +9,18 @@ public class Tile : MonoBehaviour {
 
     public int x, y;
     public int range;
-    public bool isOccupied;
+    public Human occupiedBy;
     public List<ScriptConnection> Connections = new List<ScriptConnection>();
+
+    public bool IsOccupied()
+    {
+        if(occupiedBy == null)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
 }

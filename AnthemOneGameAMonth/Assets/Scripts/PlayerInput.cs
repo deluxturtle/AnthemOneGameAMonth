@@ -126,6 +126,7 @@ public class PlayerInput : MonoBehaviour {
             yield return null;
         }
         StartCoroutine("SelectDestination");
+        StopCoroutine("SelectUnit");
     }
 
     /// <summary>
@@ -133,15 +134,12 @@ public class PlayerInput : MonoBehaviour {
     /// </summary>
     IEnumerator SelectDestination()
     {
-        Debug.Log("Select Destination");
         moveableTiles = new List<GameObject>();
         HighlightMoveableTiles(selectedEnt);
-
-
         while (true)
         {
             //If nothing is null.
-            if (selectedTile != null && selectedEnt != null && Input.GetButtonDown("Fire1") && !selectedTile.GetComponent<Tile>().isOccupied)
+            if (selectedTile != null && selectedEnt != null && Input.GetButtonDown("Fire1") && selectedTile.GetComponent<Tile>().occupiedBy == null)
             {
                 Tile sTile = selectedTile.GetComponent<Tile>();
                 //If so Move there!!
@@ -151,7 +149,7 @@ public class PlayerInput : MonoBehaviour {
                     yield return new WaitForFixedUpdate();
                     break;
                 }
-                break;
+                //break;
             }
             yield return null;
         }
@@ -222,11 +220,14 @@ public class PlayerInput : MonoBehaviour {
         foreach(ScriptConnection connection in tileInfo.Connections)
         {
             Tile goingTo = connection.goingTo.GetComponent<Tile>();
-
+            
             if (!pMoTiles.Contains(goingTo.gameObject))
             {
-                goingTo.range += pRange + connection.cost;
-                pMoTiles.Add(goingTo.gameObject);
+                if(goingTo.occupiedBy == null || (goingTo.occupiedBy != null && goingTo.occupiedBy.Faction == selectedEnt.GetComponent<Human>().Faction))
+                {
+                    goingTo.range += pRange + connection.cost;
+                    pMoTiles.Add(goingTo.gameObject);
+                }
             }
         }
     }

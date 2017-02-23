@@ -33,7 +33,13 @@ public class Human : Entity {
             switch (classType)
             {
                 case Class.Villager:
+                    speed = 5;
+                    break;
+                case Class.Knight:
                     speed = 3;
+                    break;
+                case Class.Swordsman:
+                    speed = 4;
                     break;
             }
         }
@@ -65,30 +71,45 @@ public class Human : Entity {
 
     public void MoveTo(GameObject target)
     {
-        tileOccuping.isOccupied = false;
-        StartCoroutine(AnimateMovement(target.transform.position));
+        tileOccuping.occupiedBy = null;
+        StartCoroutine(AnimateMovement(target));
         x = target.GetComponent<Tile>().x;
         y = target.GetComponent<Tile>().y;
         tileOccuping = target.GetComponent<Tile>();
-        target.GetComponent<Tile>().isOccupied = true;
+        target.GetComponent<Tile>().occupiedBy = this;
     }
 
-    IEnumerator AnimateMovement(Vector3 target)
+    IEnumerator AnimateMovement(GameObject target)
     {
-        Vector3 startPos = transform.position;
+        ScriptDijkstra dijkstra = new ScriptDijkstra();
 
-        float elapsedTime = 0;
-        float timeNeeded = (Vector3.Distance(startPos, target) / moveAnimationSpeed);
+        List<GameObject> path = dijkstra.PathFindDijkstra(tileOccuping.gameObject, target, this);
 
-        if(elapsedTime != timeNeeded)
+
+        Debug.Log("Starting while loop");
+        Debug.Log("Does path contain target? Answer: " + path.Contains(target));
+        if(path != null)
         {
-            while (elapsedTime <= timeNeeded)
+            foreach (GameObject node in path)
             {
-                transform.position = Vector3.Lerp(startPos, target, (elapsedTime / timeNeeded));
-                elapsedTime += Time.deltaTime;
-                yield return null;
+                Debug.Log("Node: " + node.name);
+                Vector3 startPos = transform.position;
+
+                float elapsedTime = 0;
+                float timeNeeded = (Vector3.Distance(startPos, node.transform.position) / moveAnimationSpeed);
+                Debug.Log("Time needed: " + timeNeeded);
+                if (timeNeeded != 0 && elapsedTime != timeNeeded)
+                {
+                    while (elapsedTime <= timeNeeded)
+                    {
+                        transform.position = Vector3.Lerp(startPos, node.transform.position, (elapsedTime / timeNeeded));
+                        elapsedTime += Time.deltaTime;
+                        yield return null;
+                    }
+                    transform.position = node.transform.position;
+                }
             }
-            transform.position = target;
+
         }
     }
 
