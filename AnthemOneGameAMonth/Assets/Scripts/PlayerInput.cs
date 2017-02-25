@@ -14,6 +14,8 @@ public class PlayerInput : MonoBehaviour {
     public GameObject tileCursor;
     public GameObject highlightGraphic;
     public AudioClip clickSFX;
+    [Tooltip("The UI Panel that holds the unit's action buttons.")]
+    public GameObject actionPanel;
 
 
     private Plane plane = new Plane();
@@ -95,6 +97,7 @@ public class PlayerInput : MonoBehaviour {
         if (Input.GetButtonDown("Fire1"))
         {
             audioSrc.Play();
+            
         }
     }
 
@@ -116,6 +119,7 @@ public class PlayerInput : MonoBehaviour {
                         {
                             selectedEnt = tempHuman.gameObject;
                             selectedUnit = true;
+                            OpenActionPanel();
                             yield return new WaitForFixedUpdate();
                             break;
                         }
@@ -125,8 +129,15 @@ public class PlayerInput : MonoBehaviour {
             }
             yield return null;
         }
-        StartCoroutine("SelectDestination");
+        //StartCoroutine("SelectDestination");
         StopCoroutine("SelectUnit");
+    }
+
+    void OpenActionPanel()
+    {
+        //Move action panel to the world pos of the unit.
+        actionPanel.SetActive(true);
+        //TODO setup hooks into the button for moving and attacking.
     }
 
     /// <summary>
