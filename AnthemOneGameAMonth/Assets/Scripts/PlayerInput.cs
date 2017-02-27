@@ -28,9 +28,11 @@ public class PlayerInput : MonoBehaviour {
     private List<GameObject> tileHighlights = new List<GameObject>(); //for deleting all the graphics later.
     private AudioSource audioSrc;
     private bool leftMouseClick = false;
+    private Canvas canvas;
 
     void Start()
     {
+        canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
         audioSrc = GetComponent<AudioSource>();
         if(audioSrc == null)
         {
@@ -91,7 +93,7 @@ public class PlayerInput : MonoBehaviour {
             }
         }
 
-        cursor.transform.position = mousePos;
+        cursor.transform.position = Camera.main.WorldToScreenPoint(mousePos);
 
         //Get input
         if (Input.GetButtonDown("Fire1"))
@@ -138,6 +140,20 @@ public class PlayerInput : MonoBehaviour {
         //Move action panel to the world pos of the unit.
         actionPanel.SetActive(true);
         //TODO setup hooks into the button for moving and attacking.
+        actionPanel.transform.position = Camera.main.WorldToScreenPoint(selectedEnt.transform.position);
+        actionPanel.transform.position += new Vector3(130, -25) * canvas.scaleFactor; // * the Canvas Scale!!!!
+    }
+
+    public void _MoveUnitBtnHook()
+    {
+        StartCoroutine("SelectDestination");
+    }
+
+    public void _CloseActionPanel()
+    {
+        //play close animation then set active to false
+        actionPanel.SetActive(false);
+        
     }
 
     /// <summary>
@@ -145,6 +161,9 @@ public class PlayerInput : MonoBehaviour {
     /// </summary>
     IEnumerator SelectDestination()
     {
+        //wait for the up click
+        yield return new WaitForFixedUpdate();
+
         moveableTiles = new List<GameObject>();
         HighlightMoveableTiles(selectedEnt);
         while (true)
